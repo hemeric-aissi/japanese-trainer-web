@@ -1,0 +1,547 @@
+/* ── Variables globales : palette de couleurs et tokens de design ── */
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --accent: #c0392b;
+    --gold: #b8860b;
+    --muted: #8a7e6e;
+    --correct: #2d6a2d;
+    --wrong: #c0392b;
+    --correct-bg: #e8f5e8;
+    --wrong-bg: #fdecea;
+    --border: #d4c9b0;
+    --shadow: rgba(26,18,8,0.12);
+  }
+
+  /* Reset universel */
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* Corps de page : fond papier avec lignes horizontales subtiles */
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 27px, rgba(180,160,120,0.15) 28px);
+  }
+
+  /* ── En-tête : fond sombre avec kanji fantôme en arrière-plan ── */
+  header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '日本語';
+    position: absolute;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 120px;
+    font-weight: 800;
+    opacity: 0.06;
+    top: -20px; right: -10px;
+    color: var(--paper);
+    pointer-events: none;
+  }
+  header h1 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+  }
+  header p {
+    font-size: 0.75rem;
+    color: #a0957f;
+    margin-top: 4px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ── Barre de progression : se remplit quand une section est validée à 100% ── */
+  .progress-bar {
+    background: #2e2516;
+    height: 4px;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 0.4s ease;
+  }
+
+  /* ── Navigation horizontale scrollable : onglets par section ── */
+  nav {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    background: var(--ink);
+    border-top: 1px solid #2e2516;
+    scrollbar-width: none;
+  }
+  nav::-webkit-scrollbar { display: none; }
+  nav button {
+    background: transparent;
+    border: none;
+    color: #7a6e5e;
+    padding: 10px 16px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    letter-spacing: 0.05em;
+  }
+  nav button:hover { color: var(--paper); }
+  nav button.active {
+    color: var(--paper);
+    border-bottom-color: var(--accent);
+  }
+  nav button.done { color: var(--gold); }
+  nav button.done.active { border-bottom-color: var(--gold); }
+
+  /* ── Zone de contenu principale : centrée, largeur max 760px ── */
+  main {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem 4rem;
+  }
+
+  /* ── En-tête de section : numéro rouge + titre + description ── */
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--ink);
+  }
+  .section-num {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .section-info h2 {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .section-info p {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Carte d'exercice : fond blanc, ombre légère, coins nets ── */
+  .exercise {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 2px 2px 0 var(--shadow);
+    position: relative;
+  }
+  .exercise-prompt {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  .exercise-prompt .blank {
+    display: inline-block;
+    border-bottom: 2px solid var(--ink);
+    min-width: 60px;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--muted);
+    padding: 0 4px;
+  }
+
+  /* ── Inputs de réponse pleine largeur : vert si correct, rouge si faux ── */
+  .answer-input {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .answer-input:focus { border-color: var(--ink); }
+  .answer-input.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+  .answer-input.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+
+  /* ── Input inline pour les exercices de complétion (particules, mots manquants) ── */
+  .inline-input {
+    display: inline-block;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    color: var(--ink);
+    width: 80px;
+    text-align: center;
+    outline: none;
+    padding: 2px 4px;
+    transition: border-color 0.2s;
+  }
+  .inline-input:focus { border-bottom-color: var(--accent); }
+  .inline-input.correct { border-bottom-color: var(--correct); color: var(--correct); }
+  .inline-input.wrong { border-bottom-color: var(--wrong); color: var(--wrong); }
+
+  /* ── Menu déroulant pour les choix arimasu/imasu et nani/nan ── */
+  .answer-select {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 6px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    outline: none;
+  }
+  .answer-select.correct { border-color: var(--correct); background: var(--correct-bg); color: var(--correct); }
+  .answer-select.wrong { border-color: var(--wrong); background: var(--wrong-bg); color: var(--wrong); }
+
+  /* ── Hint de correction : caché par défaut, affiché après validation ── */
+  .correction {
+    display: none;
+    margin-top: 8px;
+    font-size: 0.78rem;
+    color: var(--correct);
+    font-style: italic;
+  }
+  .correction.visible { display: block; }
+  .correction.wrong-hint { color: var(--wrong); }
+
+  /* ── Boutons QCM : 4 choix en grille 2x2, états selected/correct/wrong/reveal ── */
+  .qcm-btn {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: white;
+    color: var(--ink);
+    padding: 8px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+  .qcm-btn:hover { background: var(--paper); border-color: var(--ink); }
+  .qcm-btn.qcm-selected { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+  .qcm-btn.qcm-correct { background: var(--correct-bg); color: var(--correct); border-color: var(--correct); pointer-events: none; }
+  .qcm-btn.qcm-wrong { background: var(--wrong-bg); color: var(--wrong); border-color: var(--wrong); pointer-events: none; }
+  .qcm-btn.qcm-reveal { background: var(--correct-bg); color: var(--correct); border-color: var(--correct); pointer-events: none; }
+
+
+  /* ── Tableau de conjugaison (section 4) : lignes alternées, inputs intégrés ── */
+  .conj-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+  }
+  .conj-table th {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 8px 12px;
+    font-family: 'Shippori Mincho', serif;
+    font-weight: 600;
+    text-align: left;
+    font-size: 0.8rem;
+  }
+  .conj-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.95rem;
+  }
+  .conj-table tr:nth-child(even) td { background: #faf7f0; }
+  .conj-table td input {
+    border: none;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.85rem;
+    width: 130px;
+    outline: none;
+    padding: 2px 4px;
+    color: var(--ink);
+  }
+  .conj-table td input.correct { border-bottom-color: var(--correct); color: var(--correct); }
+  .conj-table td input.wrong { border-bottom-color: var(--wrong); color: var(--wrong); }
+
+  /* ── Boutons d'action : Corriger (plein) et Réinitialiser (contour) ── */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 1.5rem;
+    align-items: center;
+  }
+  .btn {
+    border: 1px solid var(--ink);
+    background: transparent;
+    color: var(--ink);
+    padding: 8px 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.05em;
+    transition: all 0.15s;
+    border-radius: 2px;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn-primary {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+
+  /* ── Badge de score affiché à droite des boutons après correction ── */
+  .score-badge {
+    margin-left: auto;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .score-badge strong { color: var(--ink); }
+
+  /* ── Panneau de résultat : fond sombre, score en doré, traductions + règles ── */
+  .result-panel {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1rem 1.5rem;
+    border-radius: 2px;
+    margin-top: 1.5rem;
+    display: none;
+    font-size: 0.85rem;
+    line-height: 1.8;
+  }
+  .result-panel.visible { display: block; }
+  .result-panel .result-score {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--gold);
+  }
+
+  /* ── Gestion de l'affichage des sections : une seule visible à la fois ── */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── Grille 2 colonnes pour l'exercice des nombres ── */
+  .number-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .number-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: white;
+    border: 1px solid var(--border);
+    padding: 8px 12px;
+    border-radius: 2px;
+  }
+  .number-item .num-label {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    min-width: 50px;
+  }
+
+  /* ── Phrase avec blancs à remplir : hauteur de ligne généreuse pour les inputs inline ── */
+  .particle-sentence {
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    line-height: 2.2;
+    margin-bottom: 0.5rem;
+  }
+
+  /* ── Adaptations mobile : grille en 1 colonne, numéro de section plus petit ── */
+  @media (max-width: 600px) {
+    .number-grid { grid-template-columns: 1fr; }
+    .section-num { font-size: 2rem; }
+  }
+
+/* ══════════════════════════════════════════════════════════════
+   PAGES D'AUTHENTIFICATION (login.php / register.php)
+══════════════════════════════════════════════════════════════ */
+
+/* Corps centré pour les pages auth */
+body.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1rem;
+}
+
+/* Carte centrale */
+.auth-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 4px 4px 0 var(--shadow);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* En-tête de la carte */
+.auth-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.auth-header h1 {
+  font-family: 'Shippori Mincho', serif;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+
+.auth-header p {
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Groupes de champs */
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--ink);
+  margin-bottom: 6px;
+  letter-spacing: 0.05em;
+}
+
+.form-group label .hint {
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: var(--ink);
+}
+
+/* Bouton principal auth */
+.btn-auth {
+  width: 100%;
+  padding: 12px;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  border-radius: 2px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  transition: background 0.15s;
+}
+
+.btn-auth:hover {
+  background: var(--accent);
+}
+
+/* Lien bas de page (aller vers login / register) */
+.auth-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.auth-link a {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.auth-link a:hover {
+  color: var(--accent);
+}
+
+/* Alertes */
+.alert {
+  padding: 10px 14px;
+  border-radius: 2px;
+  font-size: 0.8rem;
+  margin-bottom: 1.25rem;
+  border-left: 3px solid;
+}
+
+.alert-error {
+  background: var(--wrong-bg);
+  color: var(--wrong);
+  border-color: var(--wrong);
+}
+
+.alert-success {
+  background: var(--correct-bg);
+  color: var(--correct);
+  border-color: var(--correct);
+}
+
+/* ── Barre utilisateur dans app.php ─────────────────────────── */
+.user-bar {
+  position: absolute;
+  top: 1rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.75rem;
+  color: #a0957f;
+}
+
+.logout-link {
+  color: #a0957f;
+  text-decoration: none;
+  border: 1px solid #3a3020;
+  padding: 4px 10px;
+  border-radius: 2px;
+  transition: all 0.15s;
+}
+
+.logout-link:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}
+
+/* Header relatif pour positionner la user-bar */
+header {
+  position: relative;
+}
